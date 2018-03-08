@@ -1,6 +1,6 @@
 # Linux executables
-#*
-#!*.*
+*
+!*.*
  
 # Compiled Object files
 *.slo
