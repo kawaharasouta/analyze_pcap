@@ -10,6 +10,8 @@
 #include<errno.h>
 #include<pcap.h>
 
+#include<netinet/if_ether.h>
+
 #define SIZE 1024
 
 int main(int argc, char* argv[]){
@@ -43,8 +45,19 @@ int main(int argc, char* argv[]){
 		printf("*** frame%d ***\n", frame_num);
 		printf("packet length: %d byte\n", pkthdr.caplen);
 
-		printf("%s\n",packet);
-		
+		//printf("%x\n",packet[0]);
+
+		struct ether_header *eth;
+		int size = pkthdr.caplen;
+		eth = (struct ether_header *) packet;
+		//increment
+		packet += sizeof(struct ether_header);
+		size -= sizeof(struct ether_header);
+
+		printf("dest: %02x:%02x:%02x:%02x:%02x:%02x\n",eth->ether_dhost[0], eth->ether_dhost[1], eth->ether_dhost[2],eth->ether_dhost[3],eth->ether_dhost[4],eth->ether_dhost[5]);
+		printf("source: %02x:%02x:%02x:%02x:%02x:%02x\n",eth->ether_shost[0], eth->ether_shost[1], eth->ether_shost[2],eth->ether_shost[3],eth->ether_shost[4],eth->ether_shost[5]);
+
+
 		printf("\n\n");
 		frame_num++;
 	}

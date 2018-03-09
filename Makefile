@@ -10,6 +10,6 @@ $(TARGET):$(OBJS)
 
 .PHONY: clean remove
 clean:
-	rm *.o
+	@rm *.o
 remove:
-	rm main
+	@rm main
