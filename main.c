@@ -56,6 +56,18 @@ int main(int argc, char* argv[]){
 
 		printf("dest: %02x:%02x:%02x:%02x:%02x:%02x\n",eth->ether_dhost[0], eth->ether_dhost[1], eth->ether_dhost[2],eth->ether_dhost[3],eth->ether_dhost[4],eth->ether_dhost[5]);
 		printf("source: %02x:%02x:%02x:%02x:%02x:%02x\n",eth->ether_shost[0], eth->ether_shost[1], eth->ether_shost[2],eth->ether_shost[3],eth->ether_shost[4],eth->ether_shost[5]);
+		printf("ether type: %04x\n", eth->ether_type);
+		
+		//u_int16_t head, tail;
+		//head = (eth->ether_type & 0xff00) >> 8;
+		//tail = (eth->ether_type & 0x00ff) << 8;
+		u_int16_t type_num = ((eth->ether_type & 0xff00) >> 8) + ((eth->ether_type & 0x00ff) << 8);
+
+		printf("ether type true: %04x\n", type_num);
+
+		if (type_num == ETHERTYPE_ARP){
+			printf("arp\n");
+		}
 
 
 		printf("\n\n");
