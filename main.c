@@ -68,6 +68,9 @@ int main(int argc, char* argv[]){
 		if (type_num == ETHERTYPE_ARP){
 			printf("arp\n");
 		}
+		if (type_num == ETHERTYPE_IP) {
+			printf("ip\n");
+		}
 
 
 		printf("\n\n");
