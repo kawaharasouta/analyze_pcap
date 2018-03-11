@@ -11,15 +11,18 @@
 #include<pcap.h>
 
 #include<netinet/if_ether.h>
+#include<netinet/ip.h>
 
 #define SIZE 1024
 
 u_int16_t swap_16byte(u_int16_t num);
-void analyze_arp(u_char *packet, int size);
 char* print_mac_addr(u_int8_t *mac_addr, char *mac, size_t size);
+char* print_ip_addr(u_int8_t *ip_addr, char *ip, size_t size);
 
+void analyze_arp(u_char *packet, int size);
 void arp_request(struct ether_arp *eth_arp);
 void arp_reply(struct ether_arp eth_arp);
+void analyze_ip(u_char *packet, int size);
 
 int main(int argc, char* argv[]){
   if (argc  != 2) {
@@ -84,6 +87,11 @@ int main(int argc, char* argv[]){
 		}
 		else if (type_num == ETHERTYPE_IP) {
 			printf("ip\n");
+			analyze_ip(packet, size);
+		}
+		else if (type_num == ETHERTYPE_IPV6){
+			printf("ipv6\n");
+
 		}
 
 
@@ -168,5 +176,30 @@ void arp_request(struct ether_arp *eth_arp){
 void arp_reply(struct ether_arp eth_arp){
 
 }
+
+void analyze_ip(u_char *packet, int size){
+	struct ip *ip_hdr;
+
+	ip_hdr = (struct ip *)packet;
+	packet += sizeof(struct ip);
+	size -= sizeof(struct ip);
+
+	printf("version: %d\n", ip_hdr->ip_v);
+	printf("header length: %d (%d byte)\n", ip_hdr->ip_hl, ip_hdr->ip_hl * 4);
+	printf("total length: %d\n", swap_16byte(ip_hdr->ip_len));
+	printf("identification: 0x%x\n", swap_16byte(ip_hdr->ip_id));
+	
+	printf("Time to Live: %d\n", ip_hdr->ip_ttl);
+	printf("proto: %x\n", ip_hdr->ip_p);
+
+	char ip[15] = {0};
+	//printf("Source: %s\n", print_ip_addr((u_int8_t)ip_hdr->ip_src.s_addr, ip, sizeof(ip)));
+	u_int8_t ip_addr[5] = {0};
+	ip_addr = (u_int8_t *)ip_hdr->ip_src.s_addr;
+	printf("%s", print_ip_addr(ip_addr, ip, sizeof(ip)));
+}
+
+
+
 
 
