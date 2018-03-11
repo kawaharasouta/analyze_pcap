@@ -135,9 +135,9 @@ void analyze_arp(u_char *packet, int size){
 	}
 }
 
-void arp_request(){
+void arp_request(struct ether_arp eth_arp){
 
 }
-void arp_reply(){
+void arp_reply(struct ether_arp eth_arp){
 
 }
