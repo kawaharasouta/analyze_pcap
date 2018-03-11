@@ -16,6 +16,8 @@
 
 u_int16_t swap_16byte(u_int16_t num);
 void analyze_arp(u_char *packet, int size);
+void arp_request(struct ether_arp *eth_arp);
+void arp_reply(struct ether_arp eth_arp);
 
 int main(int argc, char* argv[]){
   if (argc  != 2) {
@@ -95,6 +97,17 @@ u_int16_t swap_16byte(u_int16_t num){
 	return (u_int16_t)((num & 0xff00) >> 8) + ((num & 0x00ff) << 8);
 }
 
+char* print_mac_addr(u_int16_t *mac_str, char *mac){
+	//printf("Sender MAC address: %02x:%02x:%02x:%02x:%02x:%02x\n", mac_str[0], mac_str[1], mac_str[2], mac_str[3], mac_str[4], mac_str[5]);
+	snprintf(mac, sizeof(mac), "%02x:%02x:%02x:%02x:%02x:%02x", mac_str[0], mac_str[1], mac_str[2], mac_str[3], mac_str[4], mac_str[5]);
+	return mac;
+}
+
+void print_ip_addr(char *ip_str){
+
+}
+
+
 void analyze_arp(u_char *packet, int size){
 	struct ether_arp *eth_arp;
 	eth_arp = (struct ether_arp *) packet;
@@ -123,20 +136,23 @@ void analyze_arp(u_char *packet, int size){
 
 	switch (op){
 		case ARPOP_REQUEST:
-			printf("arp_request\n");i
-			arp_request()
+			printf("arp_request\n");
+			arp_request(eth_arp);
 			break;
 		case ARPOP_REPLY:
 			printf("arp_reply");
-			arp_reply();
+			//arp_reply();
 			break;
 		default:
 			break;
 	}
 }
 
-void arp_request(struct ether_arp eth_arp){
-
+void arp_request(struct ether_arp *eth_arp){
+	//printf("Sender MAC address: %02x:%02x:%02x:%02x:%02x:%02x\n", eth_arp->arp_sha[0], eth_arp->arp_sha[1], eth_arp->arp_sha[2], eth_arp->arp_sha[3], eth_arp->arp_sha[4], eth_arp->arp_sha[5]);
+	char mac[18];
+	printf("Sender MAC address: %s\n", print_mac_addr(eth_arp->arp_sha, mac));
+	printf("Sender IP address: %d.%d.%d.%d\n", eth_arp->arp_spa[0], eth_arp->arp_spa[1], eth_arp->arp_spa[2], eth_arp->arp_spa[3]);
 }
 void arp_reply(struct ether_arp eth_arp){
 
