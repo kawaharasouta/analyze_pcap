@@ -109,8 +109,9 @@ char* print_mac_addr(u_int8_t *mac_addr, char *mac, size_t size){
 	return mac;
 }
 
-void print_ip_addr(char *ip_str){
-
+char* print_ip_addr(u_int8_t *ip_addr, char *ip, size_t size){
+	snprintf(ip, size, "%d.%d.%d.%d", ip_addr[0], ip_addr[1], ip_addr[2], ip_addr[3]);
+	return ip;
 }
 
 
@@ -158,9 +159,14 @@ void analyze_arp(u_char *packet, int size){
 void arp_request(struct ether_arp *eth_arp){
 	//printf("Sender MAC address: %02x:%02x:%02x:%02x:%02x:%02x\n", eth_arp->arp_sha[0], eth_arp->arp_sha[1], eth_arp->arp_sha[2], eth_arp->arp_sha[3], eth_arp->arp_sha[4], eth_arp->arp_sha[5]);
 	char mac[18] = {0};
+	char ip[15] = {0};
 	printf("Sender MAC address: %s\n", print_mac_addr(eth_arp->arp_sha, mac, sizeof(mac)));
-	printf("Sender IP address: %d.%d.%d.%d\n", eth_arp->arp_spa[0], eth_arp->arp_spa[1], eth_arp->arp_spa[2], eth_arp->arp_spa[3]);
+	printf("Sender IP address: %s\n", print_ip_addr(eth_arp->arp_spa, ip, sizeof(ip)));
+	printf("Target MAC address: %s\n", print_mac_addr(eth_arp->arp_tha, mac, sizeof(mac)));
+	printf("Target IP address: %s\n", print_ip_addr(eth_arp->arp_tpa, ip, sizeof(ip)));
 }
 void arp_reply(struct ether_arp eth_arp){
 
 }
+
+
