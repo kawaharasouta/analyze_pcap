@@ -15,6 +15,7 @@
 
 #include<netinet/if_ether.h>
 #include<netinet/ip.h>
+#include<netinet/ip_icmp.h>
 
 #define SIZE 1024
 
@@ -203,9 +204,39 @@ void analyze_ip(u_char *packet, int size){
 	printf("Source IP Address: %s\n", inet_ntoa(ip_hdr->ip_src));
 	printf("Destination IP Address: %s\n", inet_ntoa(ip_hdr->ip_dst));
 
+	switch(ip_hdr->ip_v) {//0?
+		case IPPROTO_ICMP://1
+			printf("icmp\n");
+			//analyze_icmp();
+			break;
+		case IPPROTO_TCP://6
+			printf("tcp\n");
+			//analyze_tcp();
+			break;
+		case IPPROTO_UDP://17
+			printf("udp\n");
+			//analyze_udp();
+			break;
+
+		default:
+			printf("no\n");
+			break;
+	}
+
 }
 
+void analyze_icmp(u_char *packet, int size){
+	struct icmp *icmp_hdr;
+	icmp_hdr = (struct icmp *)packet;
+}
 
+void analyze_tcp(u_char *packet, int size){
+
+}
+
+void analyze_udp(u_char *packet, int size){
+
+}
 
 
 
