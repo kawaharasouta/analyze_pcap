@@ -10,16 +10,19 @@
 #include<errno.h>
 #include<pcap.h>
 
-#include<netinet/in.h>
+//#include<netinet/in.h>
 #include<arpa/inet.h>
 
 #include<netinet/if_ether.h>
 #include<netinet/ip.h>
 #include<netinet/ip_icmp.h>
+#include<netinet/tcp.h>
+#include<netinet/udp.h>
 
 #define SIZE 1024
 
-u_int16_t swap_16byte(u_int16_t num);
+u_int16_t swap_16_t(u_int16_t num);
+u_int32_t swap_32_t(u_int32_t num);
 char* print_mac_addr(u_int8_t *mac_addr, char *mac, size_t size);
 char* print_ip_addr(u_int8_t *ip_addr, char *ip, size_t size);
 
@@ -27,6 +30,9 @@ void analyze_arp(u_char *packet, int size);
 void arp_request(struct ether_arp *eth_arp);
 void arp_reply(struct ether_arp eth_arp);
 void analyze_ip(u_char *packet, int size);
+void analyze_icmp(u_char *packet, int size);
+void analyze_tcp(u_char *packet, int size);
+void analyze_udp(u_char *packet, int size);
 
 int main(int argc, char* argv[]){
   if (argc  != 2) {
@@ -81,7 +87,7 @@ int main(int argc, char* argv[]){
 		//head = (eth->ether_type & 0xff00) >> 8;
 		//tail = (eth->ether_type & 0x00ff) << 8;
 		//u_int16_t type_num = ((eth->ether_type & 0xff00) >> 8) + ((eth->ether_type & 0x00ff) << 8);
-		u_int16_t type_num = swap_16byte(eth->ether_type);
+		u_int16_t type_num = swap_16_t(eth->ether_type);
 
 		printf("ether type true: %04x\n", type_num);
 
@@ -111,8 +117,12 @@ int main(int argc, char* argv[]){
 
 
 //*****utilitys*****
-u_int16_t swap_16byte(u_int16_t num){
+u_int16_t swap_16_t(u_int16_t num){
 	return (u_int16_t)((num & 0xff00) >> 8) + ((num & 0x00ff) << 8);
+}
+
+u_int32_t swap_32_t(u_int32_t num){
+	return (u_int32_t)(((num & 0xff000000) >> 24) + ((num & 0x00ff0000) >> 8) + ((num & 0x0000ff00) << 8) + ((num & 0x000000ff) <<24));
 }
 
 char* print_mac_addr(u_int8_t *mac_addr, char *mac, size_t size){
@@ -138,13 +148,13 @@ void analyze_arp(u_char *packet, int size){
 
 	printf("ARP\n");
 
-	u_int16_t hrd = swap_16byte(eth_arp->ea_hdr.ar_hrd);
+	u_int16_t hrd = swap_16_t(eth_arp->ea_hdr.ar_hrd);
 	printf("hard type: %x\n", hrd);
 
-	u_int16_t proto = swap_16byte(eth_arp->ea_hdr.ar_pro);
+	u_int16_t proto = swap_16_t(eth_arp->ea_hdr.ar_pro);
 	printf("proto type: %x\n", proto);
 
-	u_int16_t op = swap_16byte(eth_arp->ea_hdr.ar_op);
+	u_int16_t op = swap_16_t(eth_arp->ea_hdr.ar_op);
 	printf("arp operation: %x\n", op);
 
 //	if (op == ARPOP_REQUEST){
@@ -190,13 +200,13 @@ void analyze_ip(u_char *packet, int size){
 
 	printf("version: %d\n", ip_hdr->ip_v);
 	printf("header length: %d (%d byte)\n", ip_hdr->ip_hl, ip_hdr->ip_hl * 4);
-	printf("total length: %d\n", swap_16byte(ip_hdr->ip_len));
-	printf("identification: 0x%x\n", swap_16byte(ip_hdr->ip_id));
+	printf("total length: %d\n", swap_16_t(ip_hdr->ip_len));
+	printf("identification: 0x%x\n", swap_16_t(ip_hdr->ip_id));
 	
 	printf("Time to Live: %d\n", ip_hdr->ip_ttl);
 	printf("proto: %x\n", ip_hdr->ip_p);
 
-	char ip[15] = {0};
+	//char ip[15] = {0};
 	//printf("Source: %s\n", print_ip_addr((u_int8_t)ip_hdr->ip_src.s_addr, ip, sizeof(ip)));
 	//u_int8_t ip_addr[5] = {0};
 	//ip_addr = (u_int8_t *)ip_hdr->ip_src.s_addr;
@@ -204,14 +214,14 @@ void analyze_ip(u_char *packet, int size){
 	printf("Source IP Address: %s\n", inet_ntoa(ip_hdr->ip_src));
 	printf("Destination IP Address: %s\n", inet_ntoa(ip_hdr->ip_dst));
 
-	switch(ip_hdr->ip_v) {//0?
+	switch(ip_hdr->ip_p) {//0?
 		case IPPROTO_ICMP://1
 			printf("icmp\n");
 			//analyze_icmp();
 			break;
 		case IPPROTO_TCP://6
 			printf("tcp\n");
-			//analyze_tcp();
+			analyze_tcp(packet, size);
 			break;
 		case IPPROTO_UDP://17
 			printf("udp\n");
@@ -228,13 +238,25 @@ void analyze_ip(u_char *packet, int size){
 void analyze_icmp(u_char *packet, int size){
 	struct icmp *icmp_hdr;
 	icmp_hdr = (struct icmp *)packet;
+
 }
 
 void analyze_tcp(u_char *packet, int size){
+	struct tcphdr *tcp_hdr;
+	tcp_hdr = (struct tcphdr *)packet;
 
+	printf("Source Port: %d\n", swap_16_t(tcp_hdr->th_sport));
+	printf("Destination Port: %d\n", swap_16_t(tcp_hdr->th_dport));
+	printf("Sequence Number: %08x\n", swap_32_t(tcp_hdr->th_seq));
+	printf("Sequence Number: %d\n", ntohl(tcp_hdr->th_seq));
+	printf("Acknowledgement Number: %08x\n", swap_32_t(tcp_hdr->th_ack));
+	printf("Acknowledgement Number: %d\n", ntohl(tcp_hdr->th_ack));
+	
 }
 
 void analyze_udp(u_char *packet, int size){
+	struct icmp *icmp_hdr;
+	icmp_hdr = (struct icmp *)packet;
 
 }
 
