@@ -10,6 +10,9 @@
 #include<errno.h>
 #include<pcap.h>
 
+#include<netinet/in.h>
+#include<arpa/inet.h>
+
 #include<netinet/if_ether.h>
 #include<netinet/ip.h>
 
@@ -194,9 +197,12 @@ void analyze_ip(u_char *packet, int size){
 
 	char ip[15] = {0};
 	//printf("Source: %s\n", print_ip_addr((u_int8_t)ip_hdr->ip_src.s_addr, ip, sizeof(ip)));
-	u_int8_t ip_addr[5] = {0};
-	ip_addr = (u_int8_t *)ip_hdr->ip_src.s_addr;
-	printf("%s", print_ip_addr(ip_addr, ip, sizeof(ip)));
+	//u_int8_t ip_addr[5] = {0};
+	//ip_addr = (u_int8_t *)ip_hdr->ip_src.s_addr;
+	//printf("%s", print_ip_addr(ip_addr, ip, sizeof(ip)));
+	printf("Source IP Address: %s\n", inet_ntoa(ip_hdr->ip_src));
+	printf("Destination IP Address: %s\n", inet_ntoa(ip_hdr->ip_dst));
+
 }
 
 
