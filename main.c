@@ -74,7 +74,7 @@ int main(int argc, char* argv[]){
 		packet += sizeof(struct ether_header);
 		size -= sizeof(struct ether_header);
 
-		printf("Ethernet\n");
+		printf("---Ethernet---\n");
 
 		//printf("dest: %02x:%02x:%02x:%02x:%02x:%02x\n",eth->ether_dhost[0], eth->ether_dhost[1], eth->ether_dhost[2],eth->ether_dhost[3],eth->ether_dhost[4],eth->ether_dhost[5]);
 		//printf("source: %02x:%02x:%02x:%02x:%02x:%02x\n",eth->ether_shost[0], eth->ether_shost[1], eth->ether_shost[2],eth->ether_shost[3],eth->ether_shost[4],eth->ether_shost[5]);
@@ -92,15 +92,15 @@ int main(int argc, char* argv[]){
 		printf("ether type true: %04x\n", type_num);
 
 		if (type_num == ETHERTYPE_ARP){
-			printf("arp\n");
+			printf("---ARP---\n");
 			analyze_arp(packet, size);
 		}
 		else if (type_num == ETHERTYPE_IP) {
-			printf("ip\n");
+			printf("---IP---\n");
 			analyze_ip(packet, size);
 		}
 		else if (type_num == ETHERTYPE_IPV6){
-			printf("ipv6\n");
+			printf("---IPv6---\n");
 
 		}
 
@@ -146,7 +146,7 @@ void analyze_arp(u_char *packet, int size){
 	packet += sizeof(struct ether_arp);
 	size -= sizeof(struct ether_arp);
 
-	printf("ARP\n");
+	//printf("ARP\n");
 
 	u_int16_t hrd = swap_16_t(eth_arp->ea_hdr.ar_hrd);
 	printf("hard type: %x\n", hrd);
@@ -166,11 +166,11 @@ void analyze_arp(u_char *packet, int size){
 
 	switch (op){
 		case ARPOP_REQUEST:
-			printf("arp_request\n");
+			printf("--arp_request--\n");
 			arp_request(eth_arp);
 			break;
 		case ARPOP_REPLY:
-			printf("arp_reply");
+			printf("--arp_reply--");
 			//arp_reply();
 			break;
 		default:
@@ -216,15 +216,15 @@ void analyze_ip(u_char *packet, int size){
 
 	switch(ip_hdr->ip_p) {//0?
 		case IPPROTO_ICMP://1
-			printf("icmp\n");
+			printf("---ICMP---\n");
 			//analyze_icmp();
 			break;
 		case IPPROTO_TCP://6
-			printf("tcp\n");
+			printf("---TCP---\n");
 			analyze_tcp(packet, size);
 			break;
 		case IPPROTO_UDP://17
-			printf("udp\n");
+			printf("---UDP---\n");
 			//analyze_udp();
 			break;
 
@@ -251,7 +251,22 @@ void analyze_tcp(u_char *packet, int size){
 	printf("Sequence Number: %d\n", ntohl(tcp_hdr->th_seq));
 	printf("Acknowledgement Number: %08x\n", swap_32_t(tcp_hdr->th_ack));
 	printf("Acknowledgement Number: %d\n", ntohl(tcp_hdr->th_ack));
-	
+
+	//printf("%d\n", tcp_hdr->th_off);
+
+	printf("[flugs]\n");
+	tcp_hdr->th_flags & TH_FIN ?  printf("\tFIN\n") : 0 ;
+	tcp_hdr->th_flags & TH_SYN ?  printf("\tSYN\n") : 0 ;
+	tcp_hdr->th_flags & TH_RST ?  printf("\tRST\n") : 0 ;
+	tcp_hdr->th_flags & TH_PUSH ?  printf("\tPUSH\n") : 0 ;
+	tcp_hdr->th_flags & TH_ACK ?  printf("\tACK\n") : 0 ;
+	tcp_hdr->th_flags & TH_URG ?  printf("\tURG\n") : 0 ;
+	tcp_hdr->th_flags & TH_ECE ?  printf("\tECE\n") : 0 ;
+	tcp_hdr->th_flags & TH_CWR ?  printf("\tCWR\n") : 0 ;
+
+	printf("Window size: %x\n", tcp_hdr->th_win);
+	printf("Checksum: %x\n", tcp_hdr->th_sum);
+	printf("Urgent Pointer: %x\n", tcp_hdr->th_urp);
 }
 
 void analyze_udp(u_char *packet, int size){
