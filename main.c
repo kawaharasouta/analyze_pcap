@@ -225,7 +225,7 @@ void analyze_ip(u_char *packet, int size){
 			break;
 		case IPPROTO_UDP://17
 			printf("---UDP---\n");
-			//analyze_udp();
+			analyze_udp(packet, size);
 			break;
 
 		default:
@@ -248,9 +248,9 @@ void analyze_tcp(u_char *packet, int size){
 	printf("Source Port: %d\n", swap_16_t(tcp_hdr->th_sport));
 	printf("Destination Port: %d\n", swap_16_t(tcp_hdr->th_dport));
 	printf("Sequence Number: %08x\n", swap_32_t(tcp_hdr->th_seq));
-	printf("Sequence Number: %d\n", ntohl(tcp_hdr->th_seq));
+	//printf("Sequence Number: %d\n", ntohl(tcp_hdr->th_seq));
 	printf("Acknowledgement Number: %08x\n", swap_32_t(tcp_hdr->th_ack));
-	printf("Acknowledgement Number: %d\n", ntohl(tcp_hdr->th_ack));
+	//printf("Acknowledgement Number: %d\n", ntohl(tcp_hdr->th_ack));
 
 	//printf("%d\n", tcp_hdr->th_off);
 
@@ -264,14 +264,19 @@ void analyze_tcp(u_char *packet, int size){
 	tcp_hdr->th_flags & TH_ECE ?  printf("\tECE\n") : 0 ;
 	tcp_hdr->th_flags & TH_CWR ?  printf("\tCWR\n") : 0 ;
 
-	printf("Window size: %x\n", tcp_hdr->th_win);
-	printf("Checksum: %x\n", tcp_hdr->th_sum);
-	printf("Urgent Pointer: %x\n", tcp_hdr->th_urp);
+	printf("Window size: %d\n", swap_16_t(tcp_hdr->th_win));
+	printf("Checksum: 0x%04x\n", swap_16_t(tcp_hdr->th_sum));
+	printf("Urgent Pointer: %x\n", swap_16_t(tcp_hdr->th_urp));
 }
 
 void analyze_udp(u_char *packet, int size){
-	struct icmp *icmp_hdr;
-	icmp_hdr = (struct icmp *)packet;
+	struct udphdr *udp_hdr;
+	udp_hdr = (struct udphdr *)packet;
+
+	printf("Source Port: %d\n", swap_16_t(udp_hdr->uh_sport));
+	printf("Destination: %d\n", swap_16_t(udp_hdr->uh_dport));
+	printf("Length: %d\n", swap_16_t(udp_hdr->uh_ulen));
+	printf("Checksum: 0x%04x\n", swap_16_t(udp_hdr->uh_sum));
 
 }
 
