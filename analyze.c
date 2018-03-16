@@ -1,9 +1,3 @@
-/**
- * @file main.c
- * @brief main source to analize pcap
- * @author khwarizmi
- */
-
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
@@ -22,126 +16,8 @@
 #include"utilitys.h"
 #include"analyze.h"
 
-#define SIZE 1024
 
-//u_int16_t swap_16_t(u_int16_t num);
-//u_int32_t swap_32_t(u_int32_t num);
-//char* print_mac_addr(u_int8_t *mac_addr, char *mac, size_t size);
-//char* print_ip_addr(u_int8_t *ip_addr, char *ip, size_t size);
-
-//void analyze_arp(u_char *packet, int size);
-//void arp_request(struct ether_arp *eth_arp);
-//void arp_reply(struct ether_arp eth_arp);
-//void analyze_ip(u_char *packet, int size);
-//void analyze_icmp(u_char *packet, int size);
-//void analyze_tcp(u_char *packet, int size);
-//void analyze_udp(u_char *packet, int size);
-
-int main(int argc, char* argv[]){
-  if (argc  != 2) {
-		fprintf(stderr, "useage ./main [filename]\n");
-		exit(1);
-	}
-
-//  FILE *fp;
-//	fp = fopen(argv[1], "r");
-//	if (!fp){
-//		perror(argv[1]);
-//	}
-	
-	pcap_t *p;
-	char errbuf[PCAP_ERRBUF_SIZE];
-
-	//p = pcap_open_offline(argv[1], errbuf);
-	p = pcap_open_offline_with_tstamp_precision(argv[1], PCAP_TSTAMP_PRECISION_NANO, errbuf);
-
-	if (!p){
-		perror(argv[1]);
-		exit(1);
-	}
-	
-	int frame_num = 1;
-	u_char *packet;
-	//memset(packet, 0, strlen(packet));
-	struct pcap_pkthdr pkthdr;
-	while ((packet = pcap_next(p, &pkthdr))/* != NULL*/){
-		printf("*** frame%d ***\n", frame_num);
-		printf("packet length: %d byte\n", pkthdr.caplen);
-
-		//printf("%x\n",packet[0]);
-
-		struct ether_header *eth;
-		int size = pkthdr.caplen;
-		eth = (struct ether_header *) packet;
-		//increment
-		packet += sizeof(struct ether_header);
-		size -= sizeof(struct ether_header);
-
-		printf("---Ethernet---\n");
-
-		//printf("dest: %02x:%02x:%02x:%02x:%02x:%02x\n",eth->ether_dhost[0], eth->ether_dhost[1], eth->ether_dhost[2],eth->ether_dhost[3],eth->ether_dhost[4],eth->ether_dhost[5]);
-		//printf("source: %02x:%02x:%02x:%02x:%02x:%02x\n",eth->ether_shost[0], eth->ether_shost[1], eth->ether_shost[2],eth->ether_shost[3],eth->ether_shost[4],eth->ether_shost[5]);
-		char mac[18] = {0};
-		printf("dest: %s\n", print_mac_addr(eth->ether_dhost, mac, sizeof(mac)));
-		printf("source: %s\n", print_mac_addr(eth->ether_shost, mac, sizeof(mac)));
-		printf("ether type: %04x\n", eth->ether_type);
-		
-		//u_int16_t head, tail;
-		//head = (eth->ether_type & 0xff00) >> 8;
-		//tail = (eth->ether_type & 0x00ff) << 8;
-		//u_int16_t type_num = ((eth->ether_type & 0xff00) >> 8) + ((eth->ether_type & 0x00ff) << 8);
-		u_int16_t type_num = swap_16_t(eth->ether_type);
-
-		printf("ether type true: %04x\n", type_num);
-
-		if (type_num == ETHERTYPE_ARP){
-			printf("---ARP---\n");
-			analyze_arp(packet, size);
-		}
-		else if (type_num == ETHERTYPE_IP) {
-			printf("---IP---\n");
-			analyze_ip(packet, size);
-		}
-		else if (type_num == ETHERTYPE_IPV6){
-			printf("---IPv6---\n");
-
-		}
-
-
-		printf("\n\n");
-		frame_num++;
-	}
-
-	printf("fin\n");
-
-	//fclose(fp);
-	pcap_close(p);
-}
-
-
-////*****utilitys*****
-//u_int16_t swap_16_t(u_int16_t num){
-//	return (u_int16_t)((num & 0xff00) >> 8) + ((num & 0x00ff) << 8);
-//}
-//
-//u_int32_t swap_32_t(u_int32_t num){
-//	return (u_int32_t)(((num & 0xff000000) >> 24) + ((num & 0x00ff0000) >> 8) + ((num & 0x0000ff00) << 8) + ((num & 0x000000ff) <<24));
-//}
-//
-//char* print_mac_addr(u_int8_t *mac_addr, char *mac, size_t size){
-//	//printf("Sender MAC address: %02x:%02x:%02x:%02x:%02x:%02x\n", eth_arp->arp_sha[0], eth_arp->arp_sha[1], eth_arp->arp_sha[2], eth_arp->arp_sha[3], eth_arp->arp_sha[4], eth_arp->arp_sha[5]);
-//	snprintf(mac, size, "%02x:%02x:%02x:%02x:%02x:%02x", mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
-//	return mac;
-//}
-//
-//char* print_ip_addr(u_int8_t *ip_addr, char *ip, size_t size){
-//	snprintf(ip, size, "%d.%d.%d.%d", ip_addr[0], ip_addr[1], ip_addr[2], ip_addr[3]);
-//	return ip;
-//}
-
-
-//*****func to analyze*****
-/*void analyze_arp(u_char *packet, int size){
+void analyze_arp(u_char *packet, int size){
 	struct ether_arp *eth_arp;
 	eth_arp = (struct ether_arp *) packet;
 
@@ -282,6 +158,3 @@ void analyze_udp(u_char *packet, int size){
 	printf("Checksum: 0x%04x\n", swap_16_t(udp_hdr->uh_sum));
 
 }
-*/
-
-

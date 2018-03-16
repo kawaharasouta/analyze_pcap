@@ -1,6 +1,6 @@
 CC=gcc
 
-OBJS=main.o utilitys.o
+OBJS=main.o analyze.o utilitys.o
 SRCS=$(OBJS:%.o=%.c)
 CFLAGS=-g -Wall
 LDLIBS=-lpcap
