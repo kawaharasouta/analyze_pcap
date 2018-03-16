@@ -1,8 +1,10 @@
 CC=gcc
+vpath %.c src
+vpath %.h include
 
 OBJS=main.o analyze.o utilitys.o
 SRCS=$(OBJS:%.o=%.c)
-CFLAGS=-g -Wall
+CFLAGS=-g -Wall -I include
 LDLIBS=-lpcap
 TARGET=main
 $(TARGET):$(OBJS)
