@@ -10,8 +10,11 @@ TARGET=main
 $(TARGET):$(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LDLIBS)
 
-.PHONY: clean remove
+.PHONY: clean remove run
 clean:
 	@rm *.o
 remove:
 	@rm main
+
+run:
+	@./main in.pcap
