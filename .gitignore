@@ -1,6 +1,7 @@
 # Linux executables
 *
 !*.*
+!Makefile
  
 # Compiled Object files
 *.slo

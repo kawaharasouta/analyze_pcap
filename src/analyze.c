@@ -140,8 +140,10 @@ void analyze_tcp(u_char *packet, int size){
 	tcp_hdr->th_flags & TH_PUSH ?  printf("\tPUSH\n") : 0 ;
 	tcp_hdr->th_flags & TH_ACK ?  printf("\tACK\n") : 0 ;
 	tcp_hdr->th_flags & TH_URG ?  printf("\tURG\n") : 0 ;
+#ifdef __APPLE
 	tcp_hdr->th_flags & TH_ECE ?  printf("\tECE\n") : 0 ;
 	tcp_hdr->th_flags & TH_CWR ?  printf("\tCWR\n") : 0 ;
+#endif
 
 	printf("Window size: %d\n", swap_16_t(tcp_hdr->th_win));
 	printf("Checksum: 0x%04x\n", swap_16_t(tcp_hdr->th_sum));
